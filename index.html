@@ -1,52 +1,49 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jeu de l'Imposteur</title>
-  <style>
-    body { font-family: Arial, sans-serif; background-color: #f0f0f0; padding: 20px; }
-    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    .hidden { display: none; }
-    .question, .responses, .votes, .result { margin-top: 20px; }
-    button { margin-top: 10px; }
-  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <div class="container">
-    <h1>Jeu de l'Imposteur</h1>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-2xl bg-white rounded-2xl shadow-xl p-6">
+    <h1 class="text-3xl font-bold text-center text-indigo-600">Jeu de l'Imposteur</h1>
 
-    <div class="setup">
-      <label for="playerCount">Nombre de joueurs :</label>
-      <input type="number" id="playerCount" min="3" max="10">
-      <button onclick="setupGame()">Démarrer</button>
+    <div id="setup" class="mt-6 space-y-4">
+      <label class="block">
+        <span class="text-gray-700">Nombre de joueurs :</span>
+        <input type="number" id="playerCount" min="3" max="10" class="mt-1 block w-full rounded border-gray-300 shadow-sm" />
+      </label>
+      <button onclick="setupGame()" class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">Démarrer</button>
     </div>
 
-    <div class="players hidden">
+    <div id="players" class="hidden mt-6 space-y-4">
       <div id="playerInputs"></div>
-      <button onclick="startGame()">Commencer la partie</button>
+      <button onclick="startGame()" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">Commencer la partie</button>
     </div>
 
-    <div class="question hidden">
-      <p id="questionText"></p>
-      <textarea id="answerInput" rows="3" cols="50"></textarea><br>
-      <button onclick="submitAnswer()">Soumettre</button>
+    <div id="question" class="hidden mt-6 space-y-4">
+      <p id="questionText" class="text-lg font-medium"></p>
+      <textarea id="answerInput" rows="3" class="w-full border rounded p-2"></textarea>
+      <button onclick="submitAnswer()" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Soumettre</button>
     </div>
 
-    <div class="responses hidden">
-      <h2>Réponses des joueurs</h2>
-      <ul id="answersList"></ul>
-      <button onclick="startVoting()">Voter</button>
+    <div id="responses" class="hidden mt-6">
+      <h2 class="text-xl font-semibold text-gray-700">Réponses des joueurs</h2>
+      <ul id="answersList" class="mt-2 space-y-2 text-gray-800"></ul>
+      <button onclick="startVoting()" class="w-full bg-yellow-600 text-white py-2 mt-4 rounded hover:bg-yellow-700">Voter</button>
     </div>
 
-    <div class="votes hidden">
-      <h2>Votez pour l'imposteur</h2>
-      <div id="voteOptions"></div>
-      <button onclick="submitVote()">Soumettre le vote</button>
+    <div id="votes" class="hidden mt-6">
+      <h2 class="text-xl font-semibold text-gray-700">Votez pour l'imposteur</h2>
+      <div id="voteOptions" class="mt-2 space-y-2"></div>
+      <button onclick="submitVote()" class="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700">Soumettre le vote</button>
     </div>
 
-    <div class="result hidden">
-      <h2>Résultat</h2>
-      <p id="resultText"></p>
+    <div id="result" class="hidden mt-6">
+      <h2 class="text-xl font-bold text-gray-800">Résultat</h2>
+      <p id="resultText" class="mt-2 text-lg"></p>
     </div>
   </div>
 
@@ -54,7 +51,6 @@
     let players = [];
     let impostorIndex;
     let answers = [];
-    let votes = [];
     let questions = [
       ["Quel est ton fruit préféré ?", "Quel fruit détestes-tu ?"],
       ["Quel sport pratiques-tu ?", "Quel sport ne t'intéresse pas ?"],
@@ -65,13 +61,13 @@
     function setupGame() {
       const count = parseInt(document.getElementById('playerCount').value);
       if (count < 3) return alert("Minimum 3 joueurs");
-      document.querySelector('.setup').classList.add('hidden');
+      document.getElementById('setup').classList.add('hidden');
       const playerInputs = document.getElementById('playerInputs');
       playerInputs.innerHTML = '';
       for (let i = 0; i < count; i++) {
-        playerInputs.innerHTML += `<input type='text' placeholder='Pseudo joueur ${i + 1}'><br>`;
+        playerInputs.innerHTML += `<input type='text' placeholder='Pseudo joueur ${i + 1}' class='w-full mt-1 p-2 border rounded' /><br>`;
       }
-      document.querySelector('.players').classList.remove('hidden');
+      document.getElementById('players').classList.remove('hidden');
     }
 
     function startGame() {
@@ -79,26 +75,26 @@
       players = Array.from(inputs).map(input => input.value || 'Joueur');
       impostorIndex = Math.floor(Math.random() * players.length);
       currentQuestionPair = questions[Math.floor(Math.random() * questions.length)];
-      document.querySelector('.players').classList.add('hidden');
+      document.getElementById('players').classList.add('hidden');
       showNextQuestion();
     }
 
     function showNextQuestion() {
       if (currentPlayer >= players.length) {
-        document.querySelector('.question').classList.add('hidden');
-        document.querySelector('.responses').classList.remove('hidden');
+        document.getElementById('question').classList.add('hidden');
+        document.getElementById('responses').classList.remove('hidden');
         const list = document.getElementById('answersList');
-        answers = answers.sort(() => Math.random() - 0.5); // shuffle
+        answers = answers.sort(() => Math.random() - 0.5);
         list.innerHTML = '';
         answers.forEach(obj => {
-          list.innerHTML += `<li>${obj.answer}</li>`;
+          list.innerHTML += `<li class='bg-gray-100 p-2 rounded'>${obj.answer}</li>`;
         });
         return;
       }
       const q = currentPlayer === impostorIndex ? currentQuestionPair[1] : currentQuestionPair[0];
       document.getElementById('questionText').innerText = `${players[currentPlayer]}, ${q}`;
       document.getElementById('answerInput').value = '';
-      document.querySelector('.question').classList.remove('hidden');
+      document.getElementById('question').classList.remove('hidden');
     }
 
     function submitAnswer() {
@@ -109,12 +105,12 @@
     }
 
     function startVoting() {
-      document.querySelector('.responses').classList.add('hidden');
-      document.querySelector('.votes').classList.remove('hidden');
+      document.getElementById('responses').classList.add('hidden');
+      document.getElementById('votes').classList.remove('hidden');
       const voteOptions = document.getElementById('voteOptions');
       voteOptions.innerHTML = '';
       players.forEach((p, i) => {
-        voteOptions.innerHTML += `<label><input type='radio' name='vote' value='${i}'> ${p}</label><br>`;
+        voteOptions.innerHTML += `<label class='block'><input type='radio' name='vote' value='${i}' class='mr-2'> ${p}</label>`;
       });
     }
 
@@ -122,13 +118,13 @@
       const selected = document.querySelector("input[name='vote']:checked");
       if (!selected) return alert("Choisissez quelqu’un à accuser !");
       const votedIndex = parseInt(selected.value);
-      document.querySelector('.votes').classList.add('hidden');
-      document.querySelector('.result').classList.remove('hidden');
+      document.getElementById('votes').classList.add('hidden');
+      document.getElementById('result').classList.remove('hidden');
       const resultText = document.getElementById('resultText');
       if (votedIndex === impostorIndex) {
-        resultText.innerText = `Bravo ! ${players[votedIndex]} était bien l'imposteur.`;
+        resultText.innerText = `🎉 Bravo ! ${players[votedIndex]} était bien l'imposteur.`;
       } else {
-        resultText.innerText = `Raté... L'imposteur était ${players[impostorIndex]}.`;
+        resultText.innerText = `😈 Raté... L'imposteur était ${players[impostorIndex]}.`;
       }
     }
   </script>
