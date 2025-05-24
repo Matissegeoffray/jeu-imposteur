@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Jeu de l'Imposteur</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f0f0f0; padding: 20px; }
+    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .hidden { display: none; }
+    .question, .responses, .votes, .result { margin-top: 20px; }
+    button { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Jeu de l'Imposteur</h1>
+
+    <div class="setup">
+      <label for="playerCount">Nombre de joueurs :</label>
+      <input type="number" id="playerCount" min="3" max="10">
+      <button onclick="setupGame()">Démarrer</button>
+    </div>
+
+    <div class="players hidden">
+      <div id="playerInputs"></div>
+      <button onclick="startGame()">Commencer la partie</button>
+    </div>
+
+    <div class="question hidden">
+      <p id="questionText"></p>
+      <textarea id="answerInput" rows="3" cols="50"></textarea><br>
+      <button onclick="submitAnswer()">Soumettre</button>
+    </div>
+
+    <div class="responses hidden">
+      <h2>Réponses des joueurs</h2>
+      <ul id="answersList"></ul>
+      <button onclick="startVoting()">Voter</button>
+    </div>
+
+    <div class="votes hidden">
+      <h2>Votez pour l'imposteur</h2>
+      <div id="voteOptions"></div>
+      <button onclick="submitVote()">Soumettre le vote</button>
+    </div>
+
+    <div class="result hidden">
+      <h2>Résultat</h2>
+      <p id="resultText"></p>
+    </div>
+  </div>
+
+  <script>
+    let players = [];
+    let impostorIndex;
+    let answers = [];
+    let votes = [];
+    let questions = [
+      ["Quel est ton fruit préféré ?", "Quel fruit détestes-tu ?"],
+      ["Quel sport pratiques-tu ?", "Quel sport ne t'intéresse pas ?"],
+    ];
+    let currentQuestionPair;
+    let currentPlayer = 0;
+
+    function setupGame() {
+      const count = parseInt(document.getElementById('playerCount').value);
+      if (count < 3) return alert("Minimum 3 joueurs");
+      document.querySelector('.setup').classList.add('hidden');
+      const playerInputs = document.getElementById('playerInputs');
+      playerInputs.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        playerInputs.innerHTML += `<input type='text' placeholder='Pseudo joueur ${i + 1}'><br>`;
+      }
+      document.querySelector('.players').classList.remove('hidden');
+    }
+
+    function startGame() {
+      const inputs = document.querySelectorAll('#playerInputs input');
+      players = Array.from(inputs).map(input => input.value || 'Joueur');
+      impostorIndex = Math.floor(Math.random() * players.length);
+      currentQuestionPair = questions[Math.floor(Math.random() * questions.length)];
+      document.querySelector('.players').classList.add('hidden');
+      showNextQuestion();
+    }
+
+    function showNextQuestion() {
+      if (currentPlayer >= players.length) {
+        document.querySelector('.question').classList.add('hidden');
+        document.querySelector('.responses').classList.remove('hidden');
+        const list = document.getElementById('answersList');
+        answers = answers.sort(() => Math.random() - 0.5); // shuffle
+        list.innerHTML = '';
+        answers.forEach(obj => {
+          list.innerHTML += `<li>${obj.answer}</li>`;
+        });
+        return;
+      }
+      const q = currentPlayer === impostorIndex ? currentQuestionPair[1] : currentQuestionPair[0];
+      document.getElementById('questionText').innerText = `${players[currentPlayer]}, ${q}`;
+      document.getElementById('answerInput').value = '';
+      document.querySelector('.question').classList.remove('hidden');
+    }
+
+    function submitAnswer() {
+      const answer = document.getElementById('answerInput').value;
+      answers.push({ player: players[currentPlayer], answer });
+      currentPlayer++;
+      showNextQuestion();
+    }
+
+    function startVoting() {
+      document.querySelector('.responses').classList.add('hidden');
+      document.querySelector('.votes').classList.remove('hidden');
+      const voteOptions = document.getElementById('voteOptions');
+      voteOptions.innerHTML = '';
+      players.forEach((p, i) => {
+        voteOptions.innerHTML += `<label><input type='radio' name='vote' value='${i}'> ${p}</label><br>`;
+      });
+    }
+
+    function submitVote() {
+      const selected = document.querySelector("input[name='vote']:checked");
+      if (!selected) return alert("Choisissez quelqu’un à accuser !");
+      const votedIndex = parseInt(selected.value);
+      document.querySelector('.votes').classList.add('hidden');
+      document.querySelector('.result').classList.remove('hidden');
+      const resultText = document.getElementById('resultText');
+      if (votedIndex === impostorIndex) {
+        resultText.innerText = `Bravo ! ${players[votedIndex]} était bien l'imposteur.`;
+      } else {
+        resultText.innerText = `Raté... L'imposteur était ${players[impostorIndex]}.`;
+      }
+    }
+  </script>
+</body>
+</html>
